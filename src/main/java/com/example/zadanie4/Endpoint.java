@@ -4,6 +4,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -50,10 +55,17 @@ public class Endpoint {
 
 
     @RequestMapping(value = "/card/{id}", method = RequestMethod.GET)
-    public String card(@PathVariable String id, Model model) {
+    @ResponseBody
+    public ResponseEntity<Resource> downloadFile(@PathVariable String id, Model model) {
         String[] data = id.split(" ");
         writeFile(data);
-        return "card";
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=card.vcf");
+        Resource fileSystemResource = new FileSystemResource("card.vcf");
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.parseMediaType("text/calendar"))
+                .body(fileSystemResource);
     }
 
     private void writeFile(String[] data) {
@@ -70,7 +82,7 @@ public class Endpoint {
             bw = new BufferedWriter(fw);
             bw.write("BEGIN:VCARD" + System.lineSeparator());
             bw.write("VERSION:2.1" + System.lineSeparator());
-            bw.write("FN:" + data[0] + " " + data[1]+ System.lineSeparator());
+            bw.write("FN:" + data[0] + " " + data[1] + System.lineSeparator());
             bw.write("N:" + data[0] + ";" + data[1] + System.lineSeparator());
             bw.write("TEL;CELL:+48-602-602-602" + System.lineSeparator());
             bw.write("END:VCARD");
@@ -92,7 +104,7 @@ public class Endpoint {
     }
 
 
-    class Input {
+    private class Input {
         String name;
 
         public Input() {
