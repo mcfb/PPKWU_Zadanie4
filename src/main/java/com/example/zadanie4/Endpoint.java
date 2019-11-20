@@ -64,7 +64,6 @@ public class Endpoint {
         Resource fileSystemResource = new FileSystemResource("card.vcf");
         return ResponseEntity.ok()
                 .headers(headers)
-                .contentType(MediaType.parseMediaType("text/calendar"))
                 .body(fileSystemResource);
     }
 
